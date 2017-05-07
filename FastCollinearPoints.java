@@ -1,32 +1,34 @@
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
-import edu.princeton.cs.algs4.StdOut;
-import edu.princeton.cs.algs4.In;
-import edu.princeton.cs.algs4.StdDraw;
 
-public class BruteCollinearPoints {
+public class FastCollinearPoints {
     private int numSeg = 0;
     private LineSegment[] segment = null;
-    public BruteCollinearPoints(Point[] points) {
+    public FastCollinearPoints(Point[] points) {
         Set<LineSegment> segmentSet = new TreeSet<LineSegment>();
         checkDataSet(points);
         if (points.length >= 4) {
-            for (int a = 0; a < points.length;a++) {
-                for (int b = a + 1; b < points.length; b++) {
-                    for (int c = b + 1; c < points.length; c++) {
-                        for (int d = c + 1; d < points.length; d++) {
-                            Point[] points1 = new Point[4];
-                            points1[0] = points[a];
-                            points1[1] = points[b];
-                            points1[2] = points[c];
-                            points1[3] = points[d];
-                            if (checkCollinear(points1)) {
-                                LineSegment col = new LineSegment(points1[0], points1[3]);
-                                numSeg++;
-                                segmentSet.add(col);
-                            }
+            Arrays.sort(points);
+            for (int pointIndex = 0; pointIndex < points.length - 1; pointIndex++) {
+                double[] slopeArray = new double[points.length - pointIndex - 1];
+                Point origin = points[pointIndex];
+                for (int j = pointIndex + 1; j < points.length; j++) {
+                    slopeArray[j - pointIndex - 1] = origin.slopeTo(points[j]);
+                }
+                Arrays.sort(slopeArray);
+                double prev;
+                double cur;
+                for (int itSlope = 1; itSlope < points.length - pointIndex; itSlope++) {
+                    cur = slopeArray[itSlope];
+                    prev = slopeArray[itSlope - 1];
+                    if (prev == cur) {
+                        int countCol = itSlope - 1;
+                        while (countCol < points.length - pointIndex - 1 && slopeArray[countCol] == prev) {
+                            countCol++;
                         }
+                        segmentSet.add(new LineSegment(origin, points[countCol - 1]));
                     }
                 }
             }
@@ -35,7 +37,6 @@ public class BruteCollinearPoints {
             }
         }
     }
-
     private boolean checkDataSet(Point[] points) {
         Set<Point> set = new TreeSet<Point>();
         if (points == null) {
