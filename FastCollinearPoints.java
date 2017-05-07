@@ -1,13 +1,12 @@
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
-
+import java.util.ArrayList;
 public class FastCollinearPoints {
     private int numSeg = 0;
     private LineSegment[] segment = null;
     public FastCollinearPoints(Point[] points) {
-        Set<LineSegment> segmentSet = new TreeSet<LineSegment>();
+        ArrayList<LineSegment> segmentList = new ArrayList<LineSegment>();
         checkDataSet(points);
         if (points.length >= 4) {
             Arrays.sort(points);
@@ -20,29 +19,42 @@ public class FastCollinearPoints {
                 Arrays.sort(slopeArray);
                 double prev;
                 double cur;
-                for (int itSlope = 1; itSlope < points.length - pointIndex; itSlope++) {
+                //5 points
+                for (int itSlope = 1; itSlope < points.length - pointIndex - 1; itSlope++) {
                     cur = slopeArray[itSlope];
                     prev = slopeArray[itSlope - 1];
-                    if (prev == cur) {
+                    if (equals(prev, cur)) {
                         int countCol = itSlope - 1;
-                        while (countCol < points.length - pointIndex - 1 && slopeArray[countCol] == prev) {
+                        while (countCol < points.length - pointIndex - 1
+                                && equals(slopeArray[countCol], prev)) {
                             countCol++;
                         }
-                        segmentSet.add(new LineSegment(origin, points[countCol - 1]));
+                        segmentList.add(new LineSegment(origin, points[countCol - 1]));
                     }
                 }
             }
-            if (segmentSet.size() != 0) {
-                segment = segmentSet.toArray(new LineSegment[numSeg]);
+            if (segmentList.size() != 0) {
+                segment = segmentList.toArray(new LineSegment[numSeg]);
             }
         }
     }
+    private boolean equals(double a, double b) {
+        if (a == Double.POSITIVE_INFINITY) {
+            return b == Double.POSITIVE_INFINITY;
+        }
+        if (a == Double.NEGATIVE_INFINITY) {
+            return b == Double.NEGATIVE_INFINITY;
+        }
+        return b == Double.POSITIVE_INFINITY || b == Double.NEGATIVE_INFINITY &&
+                (Math.abs(a - b) < 0.0001);
+    }
+
     private boolean checkDataSet(Point[] points) {
         Set<Point> set = new TreeSet<Point>();
         if (points == null) {
             throw new java.lang.NullPointerException("Null input");
         }
-        for (int a = 0; a < points.length;a++) {
+        for (int a = 0; a < points.length; a++) {
             if (points[a] == null) {
                 throw new java.lang.NullPointerException("Null input");
             } else if (!set.add(points[a])) {
@@ -52,16 +64,14 @@ public class FastCollinearPoints {
         return false;
     }
 
-    private boolean checkCollinear(Point[] points) {
-        Arrays.sort(points);
-        double slope = points[0].slopeTo(points[1]);
-        return slope == points[0].slopeTo(points[2]) && slope == points[0].slopeTo(points[3]);
-    }
 
     public int numberOfSegments() {
         return numSeg;
     }    // the number of line segments
     public LineSegment[] segments() {
-        return segment;
+        if (segment != null) {
+            return Arrays.copyOf(segment, segment.length);
+        }
+        return null;
     }
 }

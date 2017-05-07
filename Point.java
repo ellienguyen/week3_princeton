@@ -8,7 +8,7 @@
  *
  ******************************************************************************/
 
-import java.util.Arrays;
+
 import java.util.Comparator;
 import edu.princeton.cs.algs4.StdDraw;
 
@@ -35,6 +35,10 @@ public class Point implements Comparable<Point> {
     public void draw() {
         /* DO NOT MODIFY */
         StdDraw.point(x, y);
+    }
+
+    private boolean equalDouble(double a, double b) {
+        return (Math.abs(a - b) < 0.0000001);
     }
 
     /**
@@ -68,7 +72,7 @@ public class Point implements Comparable<Point> {
         } else if (this.y == that.y) {
             return 0.0;
         } else {
-            return (that.y - this.y) / (that.x - this.x);
+            return (double) (that.y - this.y) / (double) (that.x - this.x);
         }
     }
 
@@ -93,17 +97,41 @@ public class Point implements Comparable<Point> {
         }
     }
 
-    private class slopeComparator implements Comparator<Point> {
+    private class SlopeComparator implements Comparator<Point> {
         public int compare(Point a, Point b) {
             double slopeA = slopeTo(a);
             double slopeB = slopeTo(b);
-            if (slopeA == slopeB) {
-                return 0;
-            } else {
-                return (int) (Math.ceil(slopeA - slopeB));
+            if (slopeA == Double.POSITIVE_INFINITY){
+                if (slopeB == Double.POSITIVE_INFINITY) {
+                    return 0;
+                } else {
+                    return -1;
+                }
             }
+            if (slopeA == Double.NEGATIVE_INFINITY){
+                if (slopeB == Double.NEGATIVE_INFINITY) {
+                    return 0;
+                } else {
+                    return 1;
+                }
+            }
+            if (slopeB == Double.POSITIVE_INFINITY){
+                return -1;
+            }
+            if (slopeB == Double.NEGATIVE_INFINITY){
+                return 1;
+            }
+
+            if (equalDouble(slopeA, slopeB)) {
+                return 0;
+            } else if (Math.ceil(slopeA - slopeB) > 0) {
+                return 1;
+            }
+            return -1;
         }
     }
+
+
 
     /**
      * Compares two points by the slope they make with this point.
@@ -113,7 +141,7 @@ public class Point implements Comparable<Point> {
      */
     public Comparator<Point> slopeOrder() {
         /* YOUR CODE HERE */
-        return new slopeComparator();
+        return new SlopeComparator();
     }
 
 
@@ -128,11 +156,6 @@ public class Point implements Comparable<Point> {
         /* DO NOT MODIFY */
         return "(" + x + ", " + y + ")";
     }
+    
 
-    /**
-     * Unit tests the Point data type.
-     */
-    public static void main(String[] args) {
-        /* YOUR CODE HERE */
-    }
 }
