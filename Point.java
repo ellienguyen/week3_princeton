@@ -101,24 +101,24 @@ public class Point implements Comparable<Point> {
         public int compare(Point a, Point b) {
             double slopeA = slopeTo(a);
             double slopeB = slopeTo(b);
-            if (slopeA == Double.POSITIVE_INFINITY){
+            if (slopeA == Double.POSITIVE_INFINITY) {
                 if (slopeB == Double.POSITIVE_INFINITY) {
-                    return 0;
-                } else {
-                    return -1;
-                }
-            }
-            if (slopeA == Double.NEGATIVE_INFINITY){
-                if (slopeB == Double.NEGATIVE_INFINITY) {
                     return 0;
                 } else {
                     return 1;
                 }
             }
-            if (slopeB == Double.POSITIVE_INFINITY){
+            if (slopeA == Double.NEGATIVE_INFINITY) {
+                if (slopeB == Double.NEGATIVE_INFINITY) {
+                    return 0;
+                } else {
+                    return -1;
+                }
+            }
+            if (slopeB == Double.POSITIVE_INFINITY) {
                 return -1;
             }
-            if (slopeB == Double.NEGATIVE_INFINITY){
+            if (slopeB == Double.NEGATIVE_INFINITY) {
                 return 1;
             }
 
@@ -156,6 +156,14 @@ public class Point implements Comparable<Point> {
         /* DO NOT MODIFY */
         return "(" + x + ", " + y + ")";
     }
-    
+
+    public static void main(String[] args) {
+        Point p = new Point(18851, 8559);
+        Point q = new Point(18851, 5830);
+        Point r = new Point(21531, 11913);
+        int a = p.slopeOrder().compare(q, r);
+        int b = p.slopeOrder().compare(r, q);
+    }
+
 
 }

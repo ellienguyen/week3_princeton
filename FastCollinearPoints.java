@@ -1,7 +1,9 @@
-import java.util.Arrays;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.ArrayList;
+import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.StdDraw;
+import edu.princeton.cs.algs4.StdOut;
+
+import java.util.*;
+
 public class FastCollinearPoints {
     private int numSeg = 0;
     private LineSegment[] segment = null;
@@ -10,26 +12,30 @@ public class FastCollinearPoints {
         checkDataSet(points);
         if (points.length >= 4) {
             Arrays.sort(points);
-            for (int pointIndex = 0; pointIndex < points.length - 1; pointIndex++) {
-                double[] slopeArray = new double[points.length - pointIndex - 1];
+            for (int pointIndex = 0; pointIndex <= points.length - 4; pointIndex++) {
+                ArrayList<Point> slopeArray = new ArrayList<Point>();
                 Point origin = points[pointIndex];
                 for (int j = pointIndex + 1; j < points.length; j++) {
-                    slopeArray[j - pointIndex - 1] = origin.slopeTo(points[j]);
+                    slopeArray.add(points[j]);
                 }
-                Arrays.sort(slopeArray);
-                double prev;
-                double cur;
-                //5 points
-                for (int itSlope = 1; itSlope < points.length - pointIndex - 1; itSlope++) {
-                    cur = slopeArray[itSlope];
-                    prev = slopeArray[itSlope - 1];
-                    if (equals(prev, cur)) {
-                        int countCol = itSlope - 1;
-                        while (countCol < points.length - pointIndex - 1
-                                && equals(slopeArray[countCol], prev)) {
-                            countCol++;
+                Collections.sort(slopeArray, origin.slopeOrder());
+                for (int itSlope = 2; itSlope < slopeArray.size(); itSlope++) {
+                    double one = origin.slopeTo(slopeArray.get(itSlope));
+                    double two = origin.slopeTo(slopeArray.get(itSlope - 1));
+                    double three = origin.slopeTo(slopeArray.get(itSlope - 2));
+                    if (equals(one, two) && equals(two, three)) {
+                        int itSlope2;
+                        for (itSlope2 = itSlope; itSlope2 < slopeArray.size(); itSlope2++) {
+                            if (!equals(origin.slopeTo(slopeArray.get(itSlope2)), one)) {
+                                segmentList.add(new LineSegment(origin, slopeArray.get(itSlope2 - 1)));
+                                itSlope = itSlope2;
+                                break;
+                            }
                         }
-                        segmentList.add(new LineSegment(origin, points[countCol - 1]));
+                        if (itSlope2 == slopeArray.size()) {
+                            segmentList.add(new LineSegment(origin, slopeArray.get(itSlope2 - 1)));
+                            break;
+                        }
                     }
                 }
             }
@@ -45,8 +51,10 @@ public class FastCollinearPoints {
         if (a == Double.NEGATIVE_INFINITY) {
             return b == Double.NEGATIVE_INFINITY;
         }
-        return b == Double.POSITIVE_INFINITY || b == Double.NEGATIVE_INFINITY &&
-                (Math.abs(a - b) < 0.0001);
+        if (b == Double.POSITIVE_INFINITY || b == Double.NEGATIVE_INFINITY) {
+            return false;
+        }
+        return (Math.abs(a - b) < 0.0001);
     }
 
     private boolean checkDataSet(Point[] points) {
@@ -72,6 +80,36 @@ public class FastCollinearPoints {
         if (segment != null) {
             return Arrays.copyOf(segment, segment.length);
         }
-        return null;
+        return new LineSegment[0];
+    }
+
+    public static void main(String[] args) {
+
+        // read the n points from a file
+        In in = new In("/Users/admin/Google Drive/College/Week3/src/input50.txt");
+        int n = in.readInt();
+        Point[] points = new Point[n];
+        for (int i = 0; i < n; i++) {
+            int x = in.readInt();
+            int y = in.readInt();
+            points[i] = new Point(x, y);
+        }
+
+        // draw the points
+        StdDraw.enableDoubleBuffering();
+        StdDraw.setXscale(0, 32768);
+        StdDraw.setYscale(0, 32768);
+        for (Point p : points) {
+            p.draw();
+        }
+        StdDraw.show();
+
+        // print and draw the line segments
+        FastCollinearPoints collinear = new FastCollinearPoints(points);
+        for (LineSegment segment : collinear.segments()) {
+            StdOut.println(segment);
+            segment.draw();
+        }
+        StdDraw.show();
     }
 }

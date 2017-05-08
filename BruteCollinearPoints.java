@@ -1,3 +1,7 @@
+import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.StdDraw;
+import edu.princeton.cs.algs4.StdOut;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Set;
@@ -6,31 +10,38 @@ import java.util.TreeSet;
 public class BruteCollinearPoints {
     private int numSeg = 0;
     private LineSegment[] segment = null;
+    private ArrayList<LineSegment> segmentList = new ArrayList<LineSegment>();
     public BruteCollinearPoints(Point[] points) {
-        ArrayList<LineSegment> segmentList = new ArrayList<LineSegment>();
         checkDataSet(points);
         if (points.length >= 4) {
-            for (int a = 0; a < points.length; a++) {
-                for (int b = a + 1; b < points.length; b++) {
-                    for (int c = b + 1; c < points.length; c++) {
-                        for (int d = c + 1; d < points.length; d++) {
-                            Point[] points1 = new Point[4];
-                            points1[0] = points[a];
-                            points1[1] = points[b];
-                            points1[2] = points[c];
-                            points1[3] = points[d];
-                            if (checkCollinear(points1)) {
-                                LineSegment col = new LineSegment(points1[0], points1[3]);
-                                numSeg++;
-                                segmentList.add(col);
-                            }
-                        }
-                    }
-                }
-            }
+            Point[] pointSet = new Point[4];
+            combination(points, pointSet, 0, points.length - 1, 0, 4);
             if (segmentList.size() != 0) {
                 segment = segmentList.toArray(new LineSegment[numSeg]);
             }
+        }
+    }
+    private Point startLE = null;
+    private Point endLE = null;
+    private void combination(Point[] points, Point[] set, int start, int end, int index, int r) {
+        if (index == r) {
+            if (checkCollinear(set)) {
+                if (startLE == null || set[0] != startLE && set[3] != endLE && !checkDuplicate(set)) {
+                    startLE = set[0];
+                    endLE = set[1];
+                    LineSegment col = new LineSegment(set[0], set[3]);
+                    numSeg++;
+                    segmentList.add(col);
+                }
+            }
+            return;
+        }
+        for (int i = start; i <= end && end-i+1 >= r-index; i++) {
+            if (index - 1 >= 0 && set[index - 1] == points[i]) {
+                return;
+            }
+            set[index] = points[i];
+            combination(points, set, i+1, end, index + 1, r);
         }
     }
 
@@ -52,7 +63,19 @@ public class BruteCollinearPoints {
     private boolean checkCollinear(Point[] points) {
         Arrays.sort(points);
         double slope = points[0].slopeTo(points[1]);
+        double slope2 = points[0].slopeTo(points[2]);
+        double slope3 = points[0].slopeTo(points[3]);
         return equals(slope, points[0].slopeTo(points[2])) && equals(slope, points[0].slopeTo(points[3]));
+    }
+
+    private boolean checkDuplicate(Point[] points) {
+        Set<Point> set = new TreeSet<Point>();
+        for (int a = 0; a < points.length; a++) {
+            if (!set.add(points[a])) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean equals(double a, double b) {
@@ -62,8 +85,10 @@ public class BruteCollinearPoints {
         if (a == Double.NEGATIVE_INFINITY) {
             return b == Double.NEGATIVE_INFINITY;
         }
-        return b == Double.POSITIVE_INFINITY || b == Double.NEGATIVE_INFINITY &&
-                (Math.abs(a - b) < 0.0001);
+        if (b == Double.POSITIVE_INFINITY || b == Double.NEGATIVE_INFINITY) {
+            return false;
+        }
+        return (Math.abs(a - b) < 0.0001);
     }
 
     public int numberOfSegments() {
@@ -73,6 +98,36 @@ public class BruteCollinearPoints {
         if (segment != null) {
             return Arrays.copyOf(segment, segment.length);
         }
-        return null;
+        return new LineSegment[0];
+    }
+
+    public static void main(String[] args) {
+
+        // read the n points from a file
+        In in = new In("/Users/admin/Google Drive/College/Week3/src/random23.txt");
+        int n = in.readInt();
+        Point[] points = new Point[n];
+        for (int i = 0; i < n; i++) {
+            int x = in.readInt();
+            int y = in.readInt();
+            points[i] = new Point(x, y);
+        }
+
+        // draw the points
+        StdDraw.enableDoubleBuffering();
+        StdDraw.setXscale(0, 32768);
+        StdDraw.setYscale(0, 32768);
+        for (Point p : points) {
+            p.draw();
+        }
+        StdDraw.show();
+
+        // print and draw the line segments
+        BruteCollinearPoints collinear = new BruteCollinearPoints(points);
+        for (LineSegment segment : collinear.segments()) {
+            StdOut.println(segment);
+            segment.draw();
+        }
+        StdDraw.show();
     }
 }
