@@ -157,13 +157,6 @@ public class Point implements Comparable<Point> {
         return "(" + x + ", " + y + ")";
     }
 
-    public static void main(String[] args) {
-        Point p = new Point(18851, 8559);
-        Point q = new Point(18851, 5830);
-        Point r = new Point(21531, 11913);
-        int a = p.slopeOrder().compare(q, r);
-        int b = p.slopeOrder().compare(r, q);
-    }
 
 
 }
