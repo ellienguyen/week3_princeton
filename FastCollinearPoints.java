@@ -1,5 +1,9 @@
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.TreeSet;
+import java.util.Set;
 
 public class FastCollinearPoints {
     private int numSeg = 0;
@@ -79,5 +83,6 @@ public class FastCollinearPoints {
         }
         return new LineSegment[0];
     }
+
 
 }
